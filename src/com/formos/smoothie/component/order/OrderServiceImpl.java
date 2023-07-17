@@ -89,10 +89,10 @@ public class OrderServiceImpl implements OrderService {
     }
 
     private List<Recipe> getRecipeList(List<Ingredient> ingredientForMenu) {
-        return recipeRepository.findByIngredient(ingredientForMenu).stream().map(recipe -> {
-            recipe.setInventory(inventoryRepository.findById(recipe.getInventoryId()));
-            return recipe;
-        }).collect(Collectors.toList());
+        return recipeRepository.findByIngredient(ingredientForMenu).stream()
+                .peek(recipe -> recipe.setInventory(inventoryRepository
+                        .findById(recipe.getInventoryId())))
+                .collect(Collectors.toList());
     }
 
     private void trackInventory(Recipe recipeOfSmoothie, int numOfCup) {

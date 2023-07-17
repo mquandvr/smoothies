@@ -26,6 +26,7 @@ public class ApplicationConsole implements Runable {
     private ApplicationContext context;
 
     @Override
+    @SuppressWarnings("InfiniteLoopStatement")
     public void run(Class<?> clazz) {
         scanner = new Scanner(System.in);
         context = new ApplicationContext(clazz);

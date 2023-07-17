@@ -229,7 +229,6 @@ public class ApplicationContext {
     }
 
     public <T> T getBean(Class<T> clazz) {
-        T t = (T) beanRegistryMap.get(clazz);
-        return t;
+        return (T) beanRegistryMap.get(clazz);
     }
 }
