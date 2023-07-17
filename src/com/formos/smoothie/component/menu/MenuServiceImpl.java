@@ -2,6 +2,7 @@ package com.formos.smoothie.component.menu;
 
 import com.formos.smoothie.common.annotation.Autowired;
 import com.formos.smoothie.common.annotation.Service;
+import com.formos.smoothie.model.Ingredient;
 import com.formos.smoothie.model.Inventory;
 import com.formos.smoothie.model.Menu;
 import com.formos.smoothie.repository.IngredientRepository;
@@ -13,6 +14,7 @@ import com.formos.smoothie.utils.SmoothieUtil;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicLong;
@@ -32,6 +34,8 @@ public class MenuServiceImpl implements MenuService {
 
     @Autowired
     private IngredientRepository ingredientRepository;
+
+    private static final int NUMBER_SMOOTHIES = 4;
 
     @Override
     public List<Menu> findAll() {
@@ -54,5 +58,29 @@ public class MenuServiceImpl implements MenuService {
             return menu;
         }).collect(Collectors.toList());
         menuRepository.updateAll(menuList);
+    }
+
+    @Override
+    public List<String> doCheckIngredient() {
+        List<Menu> menuList = menuRepository.findAll();
+        List<String> warningList = new ArrayList<>();
+        menuList.stream().forEach(menu -> {
+            List<Ingredient> ingredientList = ingredientRepository.findByMenuId(menu.getId());
+            recipeRepository.findByIngredient(ingredientList).stream().forEach(recipe -> {
+                Inventory inventory = inventoryRepository.findById(recipe.getInventoryId());
+                recipe.setInventory(inventory);
+                int quanMaterial = SmoothieUtil.getQuantityFruitNeeded(recipe.getQuantity(), recipe.getRateOfBlended(), NUMBER_SMOOTHIES);
+                if (quanMaterial >= recipe.getInventory().getQuantity()) {
+                    warningList.add(
+                            String.format("Warning - Ingredient %s gets below the level required of %s%s to make 4 more %s!"
+                            ,recipe.getInventory().getName()
+                            ,quanMaterial
+                            ,recipe.getInventory().getUnit()
+                            ,menu.getName()
+                    ));
+                }
+            });
+        });
+        return warningList;
     }
 }

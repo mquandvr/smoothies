@@ -19,4 +19,8 @@ public class MenuController {
     public void updatePrice() {
         menuService.updatePrice();
     }
+
+    public List<String> checkIngredient() {
+        return menuService.doCheckIngredient();
+    }
 }

@@ -5,7 +5,6 @@ import com.formos.smoothie.common.annotation.Component;
 import com.formos.smoothie.common.annotation.ComponentScan;
 import com.formos.smoothie.common.annotation.Controller;
 import com.formos.smoothie.common.annotation.Service;
-import com.formos.smoothie.common.notification.ApplicationObserver;
 
 import java.io.File;
 import java.io.IOException;
@@ -34,13 +33,11 @@ public class ApplicationContext {
 
     private Class<?> clazz;
 
-    ApplicationConfig config;
-
     public ApplicationContext(Class<?> clazz) {
         this.clazz = clazz;
-        this.beanRegistryMap.put(ApplicationContext.class, this);
+//        this.beanRegistryMap.put(ApplicationContext.class, this);
         initializeContext();
-        initializeConfig();
+//        initializeConfig();
     }
 
     private void initializeContext() {
@@ -49,15 +46,9 @@ public class ApplicationContext {
         doFindAllPackage(packageName);
     }
 
-    private void initializeConfig() {
-        try {
-            config = getInstance(ApplicationConfig.class);
-            ApplicationObserver observer = config.getInventoryObserver();
-            beanRegistryMap.put(observer.getClass(), observer);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
+//    private void initializeConfig() {
+//
+//    }
 
     private void doFindAllPackage(String packageName) {
 

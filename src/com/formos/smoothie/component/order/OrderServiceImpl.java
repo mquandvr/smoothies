@@ -1,9 +1,7 @@
 package com.formos.smoothie.component.order;
 
-import com.formos.smoothie.common.ApplicationContext;
 import com.formos.smoothie.common.annotation.Autowired;
 import com.formos.smoothie.common.annotation.Service;
-import com.formos.smoothie.component.notification.InventoryObserver;
 import com.formos.smoothie.model.Ingredient;
 import com.formos.smoothie.model.Inventory;
 import com.formos.smoothie.model.Menu;
@@ -41,9 +39,6 @@ public class OrderServiceImpl implements OrderService {
 
     @Autowired
     private MenuRepository menuRepository;
-
-    @Autowired
-    private ApplicationContext applicationContext;
 
     @Override
     public Order orderSmoothie(int menuId, int numOfCup) {
@@ -104,7 +99,6 @@ public class OrderServiceImpl implements OrderService {
 
     private void trackInventory(Recipe recipeOfSmoothie, int numOfCup) {
         updateIngredients(recipeOfSmoothie, numOfCup);
-        applicationContext.getBean(InventoryObserver.class).save(recipeOfSmoothie);
     }
 
     private void updateIngredients(Recipe recipe, int numOfCup) {

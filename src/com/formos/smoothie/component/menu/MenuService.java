@@ -9,4 +9,6 @@ public interface MenuService {
     public List<Menu> findAll();
 
     public void updatePrice();
+
+    public List<String> doCheckIngredient();
 }
