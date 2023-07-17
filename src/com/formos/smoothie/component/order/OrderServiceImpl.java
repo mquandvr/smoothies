@@ -68,21 +68,20 @@ public class OrderServiceImpl implements OrderService {
                 isErr.set(true);
                 System.out.println(("Ingredient not found!"));
             }
-        } else {
-            isErr.set(true);
-            System.out.println(("Menu not found!"));
-        }
 
-        if (!isErr.get()) {
-            int orderId = orderRepository.count();
-            newOrder = new Order();
-            newOrder.setId(orderId == 0 ? 1 : ++orderId);
-            newOrder.setOrderDate(LocalDateTime.now());
-            newOrder.setMenuId(menuChoose.getId());
-            newOrder.setName(menuChoose.getName());
-            newOrder.setTotalPrice(menuChoose.getPrice() * numOfCup);
-            newOrder.setNumOfCups(numOfCup);
-            orderRepository.insert(newOrder);
+            if (!isErr.get()) {
+                int orderId = orderRepository.count();
+                newOrder = new Order();
+                newOrder.setId(orderId == 0 ? 1 : ++orderId);
+                newOrder.setOrderDate(LocalDateTime.now());
+                newOrder.setMenuId(menuChoose.getId());
+                newOrder.setName(menuChoose.getName());
+                newOrder.setTotalPrice(menuChoose.getPrice() * numOfCup);
+                newOrder.setNumOfCups(numOfCup);
+                orderRepository.insert(newOrder);
+            }
+        } else {
+            System.out.println(("Menu not found!"));
         }
 
         return newOrder;
