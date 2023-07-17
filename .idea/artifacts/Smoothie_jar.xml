@@ -1,0 +1,8 @@
+<component name="ArtifactManager">
+  <artifact type="jar" name="Smoothie:jar">
+    <output-path>$PROJECT_DIR$/out/artifacts/Smoothie_jar</output-path>
+    <root id="archive" name="Smoothie.jar">
+      <element id="module-output" name="Smoothie" />
+    </root>
+  </artifact>
+</component>
