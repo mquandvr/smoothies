@@ -1,9 +1,7 @@
 package com.formos.smoothie.component.order;
 
-import com.formos.smoothie.common.ApplicationContext;
 import com.formos.smoothie.common.annotation.Autowired;
 import com.formos.smoothie.common.annotation.Service;
-import com.formos.smoothie.component.notification.InventoryObserver;
 import com.formos.smoothie.model.Ingredient;
 import com.formos.smoothie.model.Inventory;
 import com.formos.smoothie.model.Menu;
@@ -42,9 +40,6 @@ public class OrderServiceImpl implements OrderService {
     @Autowired
     private MenuRepository menuRepository;
 
-    @Autowired
-    private ApplicationContext applicationContext;
-
     @Override
     public Order orderSmoothie(int menuId, int numOfCup) {
         AtomicBoolean isErr = new AtomicBoolean(false);
@@ -53,15 +48,15 @@ public class OrderServiceImpl implements OrderService {
 
         if (Optional.ofNullable(menuChoose).isPresent()) {
 
-            System.out.println(String.format("Customer order: %s", menuChoose.getName()));
-            System.out.println(String.format("Number of cup: %s", numOfCup));
-            System.out.println(String.format("Size of cup: %s ml", CommonConstants.SIZE_OF_SMOOTHIE));
+            System.out.printf("Customer order: %s%n", menuChoose.getName());
+            System.out.printf("Number of cup: %s", numOfCup);
+            System.out.printf("Size of cup: %s ml", CommonConstants.SIZE_OF_SMOOTHIE);
 
             List<Ingredient> ingredientForMenu = ingredientRepository.findByMenuId(menuChoose.getId());
             if (CommonUtil.isCollectionNotEmpty(ingredientForMenu)) {
                 List<Recipe> recipeList = getRecipeList(ingredientForMenu);
 
-                recipeList.stream().forEach(recipe -> {
+                recipeList.forEach(recipe -> {
                     if(checkInventory(recipe, numOfCup)) {
                         trackInventory(recipe, numOfCup);
                     } else {
@@ -73,38 +68,34 @@ public class OrderServiceImpl implements OrderService {
                 isErr.set(true);
                 System.out.println(("Ingredient not found!"));
             }
-        } else {
-            isErr.set(true);
-            System.out.println(("Menu not found!"));
-        }
 
-        if (!isErr.get()) {
-            int orderId = orderRepository.count();
-            newOrder = new Order();
-            newOrder.setId(orderId == 0 ? 1 : ++orderId);
-            newOrder.setOrderDate(LocalDateTime.now());
-            newOrder.setMenuId(menuChoose.getId());
-            newOrder.setName(menuChoose.getName());
-            newOrder.setTotalPrice(menuChoose.getPrice() * numOfCup);
-            newOrder.setNumOfCups(numOfCup);
-            orderRepository.insert(newOrder);
+            if (!isErr.get()) {
+                int orderId = orderRepository.count();
+                newOrder = new Order();
+                newOrder.setId(orderId == 0 ? 1 : ++orderId);
+                newOrder.setOrderDate(LocalDateTime.now());
+                newOrder.setMenuId(menuChoose.getId());
+                newOrder.setName(menuChoose.getName());
+                newOrder.setTotalPrice(menuChoose.getPrice() * numOfCup);
+                newOrder.setNumOfCups(numOfCup);
+                orderRepository.insert(newOrder);
+            }
+        } else {
+            System.out.println(("Menu not found!"));
         }
 
         return newOrder;
     }
 
     private List<Recipe> getRecipeList(List<Ingredient> ingredientForMenu) {
-        List<Recipe> recipeList = recipeRepository.findByIngredient(ingredientForMenu).stream().map(recipe -> {
-            recipe.setInventory(inventoryRepository.findById(recipe.getInventoryId()));
-            return recipe;
-        }).collect(Collectors.toList());
-
-        return recipeList;
+        return recipeRepository.findByIngredient(ingredientForMenu).stream()
+                .peek(recipe -> recipe.setInventory(inventoryRepository
+                        .findById(recipe.getInventoryId())))
+                .collect(Collectors.toList());
     }
 
     private void trackInventory(Recipe recipeOfSmoothie, int numOfCup) {
         updateIngredients(recipeOfSmoothie, numOfCup);
-        applicationContext.getBean(InventoryObserver.class).save(recipeOfSmoothie);
     }
 
     private void updateIngredients(Recipe recipe, int numOfCup) {
@@ -117,17 +108,17 @@ public class OrderServiceImpl implements OrderService {
 
     /**
      * Deny a sale when there are not enough ingredients to make the smoothie
-     * @return
+     * @return boolean
      */
     private boolean checkInventory(Recipe recipe, int numOfCup) {
         int quanMaterial = SmoothieUtil.getQuantityFruitNeeded(recipe.getQuantity(), recipe.getRateOfBlended(), numOfCup);
         if (quanMaterial <= recipe.getInventory().getQuantity()) {
             return true;
         } else {
-            System.out.println(String.format("%-50s%-20s%s"
+            System.out.printf("%-50s%-20s%s%n"
                     ,"Ingredient: " + recipe.getInventory().getName()
                     , "Need: " + quanMaterial + recipe.getInventory().getUnit()
-                    , "Inventory: " + recipe.getInventory().getQuantity() + recipe.getInventory().getUnit()));
+                    , "Inventory: " + recipe.getInventory().getQuantity() + recipe.getInventory().getUnit());
             return false;
         }
     }

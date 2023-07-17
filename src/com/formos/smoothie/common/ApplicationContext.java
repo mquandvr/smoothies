@@ -5,7 +5,6 @@ import com.formos.smoothie.common.annotation.Component;
 import com.formos.smoothie.common.annotation.ComponentScan;
 import com.formos.smoothie.common.annotation.Controller;
 import com.formos.smoothie.common.annotation.Service;
-import com.formos.smoothie.common.notification.ApplicationObserver;
 
 import java.io.File;
 import java.io.IOException;
@@ -21,6 +20,7 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.jar.JarEntry;
@@ -30,17 +30,15 @@ import java.util.regex.Pattern;
 
 public class ApplicationContext {
 
-    private Map<Class<?>, Object> beanRegistryMap = new HashMap<>();
+    private final Map<Class<?>, Object> beanRegistryMap = new HashMap<>();
 
-    private Class<?> clazz;
-
-    ApplicationConfig config;
+    private final Class<?> clazz;
 
     public ApplicationContext(Class<?> clazz) {
         this.clazz = clazz;
-        this.beanRegistryMap.put(ApplicationContext.class, this);
+//        this.beanRegistryMap.put(ApplicationContext.class, this);
         initializeContext();
-        initializeConfig();
+//        initializeConfig();
     }
 
     private void initializeContext() {
@@ -49,19 +47,13 @@ public class ApplicationContext {
         doFindAllPackage(packageName);
     }
 
-    private void initializeConfig() {
-        try {
-            config = getInstance(ApplicationConfig.class);
-            ApplicationObserver observer = config.getInventoryObserver();
-            beanRegistryMap.put(observer.getClass(), observer);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
+//    private void initializeConfig() {
+//
+//    }
 
     private void doFindAllPackage(String packageName) {
 
-        URI uri = null;
+        URI uri;
         URL url;
         Set<Class<?>> packageSet;
         try {
@@ -105,6 +97,7 @@ public class ApplicationContext {
                 rootPath = rootPath + "/";
             }
 
+            assert jarFile != null;
             Enumeration<JarEntry> entries = jarFile.entries();
 
             while(entries.hasMoreElements()) {
@@ -151,9 +144,9 @@ public class ApplicationContext {
 
     private void doFindClasses(Set<Class<?>> result, String packageName, File rootFile) throws ClassNotFoundException {
         Pattern pattern = Pattern.compile(packageName + ".*");
-        String relativePath = null;
-        for (File contentFile : rootFile.listFiles()) {
-            String currentPath = contentFile.getAbsolutePath().toString().replace(File.separatorChar, '.');
+        String relativePath = "";
+        for (File contentFile : Objects.requireNonNull(rootFile.listFiles())) {
+            String currentPath = contentFile.getAbsolutePath().replace(File.separatorChar, '.');
             Matcher match = pattern.matcher(currentPath);
             if (match.find()) {
                 relativePath = match.group();
@@ -170,7 +163,7 @@ public class ApplicationContext {
         }
     }
 
-    private <T> void doInjectAnnotatedField(T object, Field[] declaredFields) throws Exception {
+    private <T> void doInjectAnnotatedField(T object, Field[] declaredFields) {
         for (Field field: declaredFields) {
             try {
                 if (field.isAnnotationPresent(Autowired.class)) {
@@ -209,14 +202,14 @@ public class ApplicationContext {
         return object;
     }
 
-    private <T> T getInstance(T object, Class<T> clazz) throws Exception {
+    private <T> T getInstance(T object, Class<T> clazz) {
         Field[] declaredFields = clazz.getDeclaredFields();
         doInjectAnnotatedField(object, declaredFields);
 
         return object;
     }
 
-    private <T> void doInjectAnnotatedComponent(Set<Class<?>> classSet) {
+    private void doInjectAnnotatedComponent(Set<Class<?>> classSet) {
         for (Class<?> loadingClass : classSet) {
             try {
                 if(loadingClass.isAnnotationPresent(Component.class) || loadingClass.isAnnotationPresent(Controller.class)) {

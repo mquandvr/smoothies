@@ -1,6 +1,7 @@
 package com.formos.smoothie.console;
 
 import com.formos.smoothie.common.ApplicationContext;
+import com.formos.smoothie.component.CheckInventoryResource;
 import com.formos.smoothie.component.InventoryResource;
 import com.formos.smoothie.component.MenuResource;
 import com.formos.smoothie.component.OrderResource;
@@ -15,7 +16,7 @@ public class ApplicationConsole implements Runable {
 
     private static Scanner scanner;
 
-    private static String[] options = {"1- Inventory ",
+    private static final String[] options = {"1- Inventory ",
             "2- Order",
             "3- Report",
             "4- Revenue Daily",
@@ -25,6 +26,7 @@ public class ApplicationConsole implements Runable {
     private ApplicationContext context;
 
     @Override
+    @SuppressWarnings("InfiniteLoopStatement")
     public void run(Class<?> clazz) {
         scanner = new Scanner(System.in);
         context = new ApplicationContext(clazz);
@@ -41,11 +43,13 @@ public class ApplicationConsole implements Runable {
             switch (option){
                 case 1:
                     context.getInstance(InventoryResource.class).execute(context);
+                    context.getInstance(CheckInventoryResource.class).execute(context);
                     break;
                 case 2:
                     context.getInstance(MenuResource.class).execute(context, option);
                     option = scanner.nextInt();
                     context.getInstance(OrderResource.class).execute(context, option);
+                    context.getInstance(CheckInventoryResource.class).execute(context);
                     break;
                 case 3:
                     context.getInstance(ReportResource.class).execute(context, option);
@@ -75,5 +79,4 @@ public class ApplicationConsole implements Runable {
         }
         System.out.print("Choose your option: ");
     }
-
 }
