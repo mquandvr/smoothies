@@ -20,6 +20,7 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.jar.JarEntry;
@@ -29,9 +30,9 @@ import java.util.regex.Pattern;
 
 public class ApplicationContext {
 
-    private Map<Class<?>, Object> beanRegistryMap = new HashMap<>();
+    private final Map<Class<?>, Object> beanRegistryMap = new HashMap<>();
 
-    private Class<?> clazz;
+    private final Class<?> clazz;
 
     public ApplicationContext(Class<?> clazz) {
         this.clazz = clazz;
@@ -52,7 +53,7 @@ public class ApplicationContext {
 
     private void doFindAllPackage(String packageName) {
 
-        URI uri = null;
+        URI uri;
         URL url;
         Set<Class<?>> packageSet;
         try {
@@ -96,6 +97,7 @@ public class ApplicationContext {
                 rootPath = rootPath + "/";
             }
 
+            assert jarFile != null;
             Enumeration<JarEntry> entries = jarFile.entries();
 
             while(entries.hasMoreElements()) {
@@ -143,7 +145,7 @@ public class ApplicationContext {
     private void doFindClasses(Set<Class<?>> result, String packageName, File rootFile) throws ClassNotFoundException {
         Pattern pattern = Pattern.compile(packageName + ".*");
         String relativePath = "";
-        for (File contentFile : rootFile.listFiles()) {
+        for (File contentFile : Objects.requireNonNull(rootFile.listFiles())) {
             String currentPath = contentFile.getAbsolutePath().replace(File.separatorChar, '.');
             Matcher match = pattern.matcher(currentPath);
             if (match.find()) {
@@ -200,7 +202,7 @@ public class ApplicationContext {
         return object;
     }
 
-    private <T> T getInstance(T object, Class<T> clazz) throws Exception {
+    private <T> T getInstance(T object, Class<T> clazz) {
         Field[] declaredFields = clazz.getDeclaredFields();
         doInjectAnnotatedField(object, declaredFields);
 
@@ -227,6 +229,7 @@ public class ApplicationContext {
     }
 
     public <T> T getBean(Class<T> clazz) {
-        return (T) beanRegistryMap.get(clazz);
+        T t = (T) beanRegistryMap.get(clazz);
+        return t;
     }
 }
