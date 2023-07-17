@@ -142,9 +142,9 @@ public class ApplicationContext {
 
     private void doFindClasses(Set<Class<?>> result, String packageName, File rootFile) throws ClassNotFoundException {
         Pattern pattern = Pattern.compile(packageName + ".*");
-        String relativePath = null;
+        String relativePath = "";
         for (File contentFile : rootFile.listFiles()) {
-            String currentPath = contentFile.getAbsolutePath().toString().replace(File.separatorChar, '.');
+            String currentPath = contentFile.getAbsolutePath().replace(File.separatorChar, '.');
             Matcher match = pattern.matcher(currentPath);
             if (match.find()) {
                 relativePath = match.group();
@@ -161,7 +161,7 @@ public class ApplicationContext {
         }
     }
 
-    private <T> void doInjectAnnotatedField(T object, Field[] declaredFields) throws Exception {
+    private <T> void doInjectAnnotatedField(T object, Field[] declaredFields) {
         for (Field field: declaredFields) {
             try {
                 if (field.isAnnotationPresent(Autowired.class)) {
@@ -207,7 +207,7 @@ public class ApplicationContext {
         return object;
     }
 
-    private <T> void doInjectAnnotatedComponent(Set<Class<?>> classSet) {
+    private void doInjectAnnotatedComponent(Set<Class<?>> classSet) {
         for (Class<?> loadingClass : classSet) {
             try {
                 if(loadingClass.isAnnotationPresent(Component.class) || loadingClass.isAnnotationPresent(Controller.class)) {

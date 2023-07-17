@@ -6,9 +6,9 @@ import java.util.List;
 
 public interface MenuService {
 
-    public List<Menu> findAll();
+    List<Menu> findAll();
 
-    public void updatePrice();
+    void updatePrice();
 
-    public List<String> doCheckIngredient();
+    List<String> doCheckIngredient();
 }

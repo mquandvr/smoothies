@@ -48,15 +48,15 @@ public class OrderServiceImpl implements OrderService {
 
         if (Optional.ofNullable(menuChoose).isPresent()) {
 
-            System.out.println(String.format("Customer order: %s", menuChoose.getName()));
-            System.out.println(String.format("Number of cup: %s", numOfCup));
-            System.out.println(String.format("Size of cup: %s ml", CommonConstants.SIZE_OF_SMOOTHIE));
+            System.out.printf("Customer order: %s%n", menuChoose.getName());
+            System.out.printf("Number of cup: %s", numOfCup);
+            System.out.printf("Size of cup: %s ml", CommonConstants.SIZE_OF_SMOOTHIE);
 
             List<Ingredient> ingredientForMenu = ingredientRepository.findByMenuId(menuChoose.getId());
             if (CommonUtil.isCollectionNotEmpty(ingredientForMenu)) {
                 List<Recipe> recipeList = getRecipeList(ingredientForMenu);
 
-                recipeList.stream().forEach(recipe -> {
+                recipeList.forEach(recipe -> {
                     if(checkInventory(recipe, numOfCup)) {
                         trackInventory(recipe, numOfCup);
                     } else {
@@ -89,12 +89,10 @@ public class OrderServiceImpl implements OrderService {
     }
 
     private List<Recipe> getRecipeList(List<Ingredient> ingredientForMenu) {
-        List<Recipe> recipeList = recipeRepository.findByIngredient(ingredientForMenu).stream().map(recipe -> {
+        return recipeRepository.findByIngredient(ingredientForMenu).stream().map(recipe -> {
             recipe.setInventory(inventoryRepository.findById(recipe.getInventoryId()));
             return recipe;
         }).collect(Collectors.toList());
-
-        return recipeList;
     }
 
     private void trackInventory(Recipe recipeOfSmoothie, int numOfCup) {
@@ -111,17 +109,17 @@ public class OrderServiceImpl implements OrderService {
 
     /**
      * Deny a sale when there are not enough ingredients to make the smoothie
-     * @return
+     * @return boolean
      */
     private boolean checkInventory(Recipe recipe, int numOfCup) {
         int quanMaterial = SmoothieUtil.getQuantityFruitNeeded(recipe.getQuantity(), recipe.getRateOfBlended(), numOfCup);
         if (quanMaterial <= recipe.getInventory().getQuantity()) {
             return true;
         } else {
-            System.out.println(String.format("%-50s%-20s%s"
+            System.out.printf("%-50s%-20s%s%n"
                     ,"Ingredient: " + recipe.getInventory().getName()
                     , "Need: " + quanMaterial + recipe.getInventory().getUnit()
-                    , "Inventory: " + recipe.getInventory().getQuantity() + recipe.getInventory().getUnit()));
+                    , "Inventory: " + recipe.getInventory().getQuantity() + recipe.getInventory().getUnit());
             return false;
         }
     }

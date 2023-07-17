@@ -44,7 +44,7 @@ public class MenuServiceImpl implements MenuService {
 
     @Override
     public void updatePrice() {
-        List<Menu> menuList = menuRepository.findAll().stream().map(menu -> {
+        List<Menu> menuList = menuRepository.findAll().stream().peek(menu -> {
             AtomicLong newPrice = new AtomicLong();
             recipeRepository.findByIngredient(ingredientRepository.findByMenuId(menu.getId())).forEach(recipe -> {
                 Inventory inventory = inventoryRepository.findById(recipe.getInventoryId());
@@ -55,7 +55,6 @@ public class MenuServiceImpl implements MenuService {
             });
             long updPrice = new BigDecimal(newPrice.get() / CommonConstants.FOOD_COST_PER).setScale(-3, RoundingMode.UP).longValue();
             menu.setPrice(updPrice);
-            return menu;
         }).collect(Collectors.toList());
         menuRepository.updateAll(menuList);
     }
@@ -64,9 +63,9 @@ public class MenuServiceImpl implements MenuService {
     public List<String> doCheckIngredient() {
         List<Menu> menuList = menuRepository.findAll();
         List<String> warningList = new ArrayList<>();
-        menuList.stream().forEach(menu -> {
+        menuList.forEach(menu -> {
             List<Ingredient> ingredientList = ingredientRepository.findByMenuId(menu.getId());
-            recipeRepository.findByIngredient(ingredientList).stream().forEach(recipe -> {
+            recipeRepository.findByIngredient(ingredientList).forEach(recipe -> {
                 Inventory inventory = inventoryRepository.findById(recipe.getInventoryId());
                 recipe.setInventory(inventory);
                 int quanMaterial = SmoothieUtil.getQuantityFruitNeeded(recipe.getQuantity(), recipe.getRateOfBlended(), NUMBER_SMOOTHIES);

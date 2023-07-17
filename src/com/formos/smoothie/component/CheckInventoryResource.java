@@ -14,7 +14,7 @@ public class CheckInventoryResource implements ResourceService {
         List<String> messageList = menuController.checkIngredient();
         if (CommonUtil.isCollectionNotEmpty(messageList)) {
             System.out.println("==================");
-            messageList.stream().forEach(System.out::println);
+            messageList.forEach(System.out::println);
             System.out.println("==================");
         }
     }

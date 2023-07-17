@@ -16,7 +16,7 @@ public class ApplicationConsole implements Runable {
 
     private static Scanner scanner;
 
-    private static String[] options = {"1- Inventory ",
+    private static final String[] options = {"1- Inventory ",
             "2- Order",
             "3- Report",
             "4- Revenue Daily",
